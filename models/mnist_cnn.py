@@ -65,4 +65,4 @@ score = model.evaluate(X_test, Y_test, verbose=0)
 print('Test score:', score[0])
 print('Test accuracy:', score[1])
 
-kerasimo.ToSVG('mnist_cnn', model, X_test[20:40], columns=[1,4,4,4,1,1,1,1,1,1,1])
+kerasimo.ToSVG('mnist_cnn', model, X_test[20:40], columns=[1,4,4,4,1,1,1,1,1,1,1], showarrows=False)

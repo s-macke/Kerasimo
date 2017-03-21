@@ -72,10 +72,12 @@ class ConvolutedLayer:
 						maxa = max(maxa, self.activity[i][j][kx+ky*self.columns])
 				for j in range(0, self.ny):
 					for i in range(0, self.nx):
+						a = 0
+						if (maxa != 0): a = self.activity[i][j][kx+ky*self.columns]/(maxa*0.5)
 						points.append(Neuron(
 							i * 25 + self.nx*kx*25 + kx*50,
 							j * 25 + ky*self.ny*25 + ky*50,
-							self.activity[i][j][kx+ky*self.columns]/(maxa*0.5)
+							a
 						))
 		return points
 
@@ -118,7 +120,7 @@ def GetSize(layers):
 		height = max(height, l.GetHeight())
 	return (width, height)
 
-def WriteSVG(f, layers):
+def WriteSVG(f, layers, showarrows):
 	global maxheight
 	xrect = 0
 	layeridx = 0
@@ -127,7 +129,7 @@ def WriteSVG(f, layers):
 	for l in layers:
 		neurons1 = CalcNeuronCoordinates(layeridx, layers)
 		for n in neurons1: AddCircle(circlelist, n)
-		if (layeridx != 0):
+		if (layeridx != 0) and (showarrows):
 			neurons2 = CalcNeuronCoordinates(layeridx-1, layers)
 			for n1 in neurons1:
 				for n2 in neurons2:
@@ -148,6 +150,7 @@ def WriteSVG(f, layers):
 
 def ToSVG(name, model, X, **kwargs):
 	columns = kwargs.get('columns', [1 for i in range(len(model.layers)+1)])
+	showarrows = kwargs.get('showarrows', True)
 
 	for m in model.layers:
 		print("====================================================================")
@@ -201,6 +204,6 @@ def ToSVG(name, model, X, **kwargs):
 		f.write('<path d="M0,0 L0,6 L9,3 z" fill="#888" />\n')
 		f.write('</marker>\n')
 		f.write('</defs>\n');
-		WriteSVG(f, samples[i])
+		WriteSVG(f, samples[i], showarrows)
 		f.write("</svg>\n");
 		f.close()
