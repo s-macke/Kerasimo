@@ -15,10 +15,9 @@ class Neuron:
 		self.a = a
 
 class DenseLayer:
-	def __init__(self, layer, shape, columns, activity):
+	def __init__(self, layer, columns, activity):
 		global maxheight
 		self.layer = layer
-		self.shape = shape
 		self.activity = activity
 		self.columns = columns
 		self.n = len(activity)
@@ -32,25 +31,35 @@ class DenseLayer:
 
 	def GetCoordinates(self):
 		points = list()
+		maxa = -1e99
+		mina =  1e99
 		for i in range(0, self.n):
+			a = self.activity[i]
+			maxa = max(maxa, a)
+			mina = min(mina, a)
+		for i in range(0, self.n):
+			a = self.activity[i]
+			if self.layer and self.layer.get_config() and 'activation' in self.layer.get_config():
+				if self.layer.get_config()['activation'] == 'relu':
+					if (maxa != 0): a = a/(maxa*0.5)
 			points.append(Neuron(
 				(i % self.columns)*25,
 				(i // self.columns)*25,
-				self.activity[i]))
+				a))
 		return points
 
 
 class ConvolutedLayer:
-	def __init__(self, layer, shape, columns, activity):
+	def __init__(self, layer, columns, activity):
 		global maxheight
-		self.nx = shape[1]
-		self.ny = shape[2]
-		self.nz = shape[3]
 		self.layer = layer
-		self.shape = shape
 		self.activity = activity
+		#self.activity = np.transpose(activity, (1,2,0))
+		self.nx = self.activity.shape[0]
+		self.ny = self.activity.shape[1]
+		self.nz = self.activity.shape[2]
 		self.columns = columns
-		self.n = len(activity)
+		self.n = len(self.activity)
 		maxyn = self.ny*self.nz + 2*self.nz
 		maxheight = max(maxheight, self.GetHeight())
 
@@ -66,14 +75,19 @@ class ConvolutedLayer:
 
 		for ky in range(0, self.nz // self.columns):
 			for kx in range(0, self.columns):
-				maxa = 0
+				maxa = -1e99
+				mina =  1e99
 				for j in range(0, self.ny):
 					for i in range(0, self.nx):
-						maxa = max(maxa, self.activity[i][j][kx+ky*self.columns])
+						a = self.activity[i][j][kx+ky*self.columns]
+						maxa = max(maxa, a)
+						mina = min(mina, a)
 				for j in range(0, self.ny):
 					for i in range(0, self.nx):
-						a = 0
-						if (maxa != 0): a = self.activity[i][j][kx+ky*self.columns]/(maxa*0.5)
+						a = self.activity[i][j][kx+ky*self.columns]
+						if self.layer and self.layer.get_config() and 'activation' in self.layer.get_config():
+							if self.layer.get_config()['activation'] == 'relu':
+								if (maxa != 0): a = a/(maxa*0.5)
 						points.append(Neuron(
 							i * 25 + self.nx*kx*25 + kx*50,
 							j * 25 + ky*self.ny*25 + ky*50,
@@ -166,13 +180,13 @@ def ToSVG(name, model, X, **kwargs):
 	samples = list()
 	for x in X:
 		if model.layers[0].get_config()['name'].startswith('dense'):
-			samples.append(list([DenseLayer(model.layers[0], model.layers[0].input_shape, columns[0], x)]))
+			samples.append(list([DenseLayer(model.layers[0], columns[0], x)]))
 		if model.layers[0].get_config()['name'].startswith('conv2d'):
-			samples.append(list([ConvolutedLayer(model.layers[0], model.layers[0].input_shape, columns[0], x)]))
+			samples.append(list([ConvolutedLayer(model.layers[0], columns[0], x)]))
 		if model.layers[0].get_config()['name'].startswith('zero_padding2d'):
-			samples.append(list([ConvolutedLayer(model.layers[0], model.layers[0].input_shape, columns[0], x)]))
+			samples.append(list([ConvolutedLayer(model.layers[0], columns[0], x)]))
 		if model.layers[0].get_config()['name'].startswith('max_pooling2d'):
-			samples.append(list([ConvolutedLayer(model.layers[0], model.layers[0].input_shape, columns[0], x)]))
+			samples.append(list([ConvolutedLayer(model.layers[0], columns[0], x)]))
 
 	i = 1
 	for l in model.layers:
@@ -180,13 +194,13 @@ def ToSVG(name, model, X, **kwargs):
 		result = intermediate_model.predict(X)
 		for j in range(0, len(result)):
 			if l.get_config()['name'].startswith('dense'):
-				samples[j].append(DenseLayer(l, l.output_shape, columns[i], result[j]))
+				samples[j].append(DenseLayer(l, columns[i], result[j]))
 			if l.get_config()['name'].startswith('conv2d'):
-				samples[j].append(ConvolutedLayer(l, l.output_shape, columns[i], result[j]))
+				samples[j].append(ConvolutedLayer(l, columns[i], result[j]))
 			#if l.get_config()['name'].startswith('zero_padding2d'):
 			#	samples[j].append(ConvolutedLayer(l, l.output_shape, columns[i], result[j]))
 			if l.get_config()['name'].startswith('max_pooling2d'):
-				samples[j].append(ConvolutedLayer(l, l.output_shape, columns[i], result[j]))
+				samples[j].append(ConvolutedLayer(l, columns[i], result[j]))
 		i = i + 1
 
 	print('Plotted layers + input: %d' % len(samples[0]))
