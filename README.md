@@ -17,8 +17,17 @@ originally created for a talk. Feel free to use the library or use the images pr
 ### XOR
 ![XOR](images/xor.gif)
 
-### Compress
-![Compress](images/compress.gif)
+### Encode to three neurons (learn binary)
+![Compress](images/encode30.gif)
+
+### Encode to two neurons
+![Compress](images/encode20.gif)
+
+### Encode insufficient to one neurons
+![Compress](images/encode10.gif)
+
+### Encode to one neurons with additional layer
+![Compress](images/encode18.gif)
 
 ### Digits
 ![digits](images/digits.gif)
