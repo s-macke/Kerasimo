@@ -32,8 +32,18 @@ SVG2GIF or 300
 #python models/digits.py
 #SVG2GIF digits 400
 
-#python models/compress.py
-#SVG2GIF compress 400
+#python models/encode.py 3 0
+#SVG2GIF encode30 400
+
+## 6000 epochs
+#python models/encode.py 2 0
+#SVG2GIF encode20 400
+
+#python models/encode.py 1 0
+#SVG2GIF encode10 400
+
+#python models/encode.py 1 8
+#SVG2GIF encode18 400
 
 #python models/digits_cnn.py
 #SVG2GIF digits_cnn 800
