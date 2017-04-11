@@ -28,3 +28,7 @@ originally created for a talk. Feel free to use the library or use the images pr
 
 ### Generative Adversarial Network (GAN) trained on the MNIST database
 ![mnist_acgan](images/mnist_acgan.gif)
+
+### Game Snake trained on an convoluted neural network
+![mnist_acgan](images/snake.gif)
+
