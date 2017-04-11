@@ -26,6 +26,9 @@ SVG2GIF or 300
 #python models/xor.py
 #SVG2GIF xor 300
 
+#python models/xor_wrong.py
+#SVG2GIF xor_wrong 300
+
 #python models/digits.py
 #SVG2GIF digits 400
 
