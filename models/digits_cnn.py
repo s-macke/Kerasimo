@@ -6,6 +6,8 @@ from keras.models import Model
 import numpy as np
 from lib import kerasimo
 
+ntest = 10
+
 digits = [
 
 ".***.",
@@ -88,11 +90,51 @@ digits = [
 ".***.",
 "....*",
 "*...*",
-".***."
+".***.",
+
+".***.",
+"*...*",
+"*...*",
+"*****",
+"*...*",
+"*...*",
+"*...*",
+
+"****.",
+"*...*",
+"*...*",
+"****.",
+"*...*",
+"*...*",
+"****.",
+
+".***.",
+"*...*",
+"*....",
+"*....",
+"*....",
+"*...*",
+".***.",
+
+"****.",
+"*...*",
+"*...*",
+"*...*",
+"*...*",
+"*...*",
+"****.",
+
+".***.",
+"*...*",
+"*....",
+".**..",
+"*....",
+"*...*",
+".***.",
 ]
 
 X = list();
-for i in range(0, 10):
+for i in range(0, ntest):
 	X.append(np.empty((5, 7, 1)));
 	for jj in range(0, 7):
 		for ii in range(0, 5):
@@ -101,33 +143,19 @@ for i in range(0, 10):
 			else:
 				X[i][ii][jj][0] = 0.
 
+
 X = np.array(X);
-
-Y = np.array([
-[1,0,0,0,0,0,0,0,0,0],
-[0,1,0,0,0,0,0,0,0,0],
-[0,0,1,0,0,0,0,0,0,0],
-[0,0,0,1,0,0,0,0,0,0],
-[0,0,0,0,1,0,0,0,0,0],
-[0,0,0,0,0,1,0,0,0,0],
-[0,0,0,0,0,0,1,0,0,0],
-[0,0,0,0,0,0,0,1,0,0],
-[0,0,0,0,0,0,0,0,1,0],
-[0,0,0,0,0,0,0,0,0,1],
-])
-
+Y = np.identity(ntest);
 
 model = Sequential()
 
 model.add(ZeroPadding2D(padding=1, input_shape=(5, 7, 1)))
-
-#model.add(Conv2D(2, (3, 3), activation='relu', padding='same', input_shape=(5, 7, 1)))
-model.add(Conv2D(2, (3, 3), activation='relu'))
-
-model.add(MaxPooling2D(pool_size=(2, 3)))
+model.add(Conv2D(2, (2, 2), activation='relu'))
+model.add(MaxPooling2D(pool_size=(3, 3)))
+model.add(Dropout(0.10))
 model.add(Flatten())
 
-model.add(Dense(10, activation='sigmoid'))
+model.add(Dense(ntest, activation='sigmoid'))
 
 sgd = SGD(lr=0.1)
 model.compile(loss='binary_crossentropy', optimizer=sgd)
