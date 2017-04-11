@@ -26,4 +26,5 @@ originally created for a talk. Feel free to use the library or use the images pr
 ### Written Digits Neural Network trained with MNIST database
 ![mnist cnn](images/mnist_cnn.gif)
 
-
+### Generative Adversarial Network (GAN) trained on the MNIST database
+![mnist_acgan](images/mnist_acgan.gif)
