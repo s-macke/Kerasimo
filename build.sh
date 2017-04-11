@@ -38,6 +38,9 @@ SVG2GIF or 300
 #python models/mnist_cnn.py
 #SVG2GIF mnist_cnn 1600
 
-# set image_data_format first
+#set image_data_format first
 #python models/snake.py
 #SVG2GIF snake 1600
+
+#python models/mnist_acgan.py
+#convert plot_epoch*.png images/mnist_acgan.gif
