@@ -11,6 +11,9 @@ originally created for a talk. Feel free to use the library or use the images pr
 ### AND
 ![OR](images/and.gif)
 
+### Insufficient network for XOR
+![XOR](images/xor_wrong.gif)
+
 ### XOR
 ![XOR](images/xor.gif)
 
