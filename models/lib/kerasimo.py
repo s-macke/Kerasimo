@@ -1,3 +1,6 @@
+# Library Kerasimo
+# you might have to set "export LANG=en_US.UTF-8"
+
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation
 from keras.optimizers import SGD
@@ -5,6 +8,7 @@ from keras.models import Model
 import numpy as np
 import math
 import collections
+
 
 maxheight = 0
 
@@ -164,11 +168,22 @@ def WriteSVG(f, layers, showarrows):
 
 def ToSVG(name, model, X, **kwargs):
 	columns = kwargs.get('columns', [1 for i in range(len(model.layers)+1)])
-	showarrows = kwargs.get('showarrows', True)
+	showarrows   = kwargs.get('showarrows', True)
+	batch_size   = kwargs.get('batch_size', 32)
+	showreshape = kwargs.get('showreshape', False)
+
+	print('Kerasimo')
+	print('  class:         ', model.__class__.__name__);
+	print('  layers:        ', len(model.layers));
+	print('  columns:        ', columns);
+	print('  training data: ', X.shape);
 
 	for m in model.layers:
 		print("====================================================================")
-		print(m.get_config())
+		print(m.__class__.__name__)
+		#if (m.__class__.__name__ == 'Lambda'): continue
+		if "get_config" in dir(m):
+			print(m.get_config())
 		if m.get_weights():
 			print('weights list len: ', len(m.get_weights()))
 			for w in  m.get_weights():
@@ -179,27 +194,39 @@ def ToSVG(name, model, X, **kwargs):
 
 	samples = list()
 	for x in X:
-		if model.layers[0].get_config()['name'].startswith('dense'):
+		if model.layers[0].__class__.__name__ == 'InputLayer':
+			samples.append(list([ConvolutedLayer(model.layers[0], columns[0], x)]))
+		if model.layers[0].__class__.__name__ == 'Dense':
 			samples.append(list([DenseLayer(model.layers[0], columns[0], x)]))
-		if model.layers[0].get_config()['name'].startswith('conv2d'):
+		if model.layers[0].__class__.__name__ == 'Conv2D':
 			samples.append(list([ConvolutedLayer(model.layers[0], columns[0], x)]))
-		if model.layers[0].get_config()['name'].startswith('zero_padding2d'):
+		if model.layers[0].__class__.__name__ == 'ZeroPadding2D':
 			samples.append(list([ConvolutedLayer(model.layers[0], columns[0], x)]))
-		if model.layers[0].get_config()['name'].startswith('max_pooling2d'):
+		if model.layers[0].__class__.__name__ == 'MaxPooling2D':
 			samples.append(list([ConvolutedLayer(model.layers[0], columns[0], x)]))
+
+	print('generated list for ', len(samples), ' samples')
+	if (len(samples) == 0): return
 
 	i = 1
 	for l in model.layers:
 		intermediate_model = Model(inputs=model.input, outputs=l.output)
-		result = intermediate_model.predict(X)
+		result = intermediate_model.predict(X, batch_size=batch_size)
+		print('train to layer: ', i, ' with result len: ', result.shape)
 		for j in range(0, len(result)):
-			if l.get_config()['name'].startswith('dense'):
+			if l.__class__.__name__ == 'Dense':
 				samples[j].append(DenseLayer(l, columns[i], result[j]))
-			if l.get_config()['name'].startswith('conv2d'):
+			if l.__class__.__name__ == 'Flatten' and showreshape:
+				samples[j].append(DenseLayer(l, columns[i], result[j]))
+			if l.__class__.__name__ == 'Conv2D':
 				samples[j].append(ConvolutedLayer(l, columns[i], result[j]))
-			#if l.get_config()['name'].startswith('zero_padding2d'):
+			if l.__class__.__name__ == 'Reshape' and showreshape:
+				samples[j].append(ConvolutedLayer(l, columns[i], result[j]))
+			if l.__class__.__name__ == 'Conv2DTranspose':
+				samples[j].append(ConvolutedLayer(l, columns[i], result[j]))
+			#if l.__class__.__name__ == 'ZeroPadding2D':
 			#	samples[j].append(ConvolutedLayer(l, l.output_shape, columns[i], result[j]))
-			if l.get_config()['name'].startswith('max_pooling2d'):
+			if l.__class__.__name__ == 'MaxPooling2D':
 				samples[j].append(ConvolutedLayer(l, columns[i], result[j]))
 		i = i + 1
 
